@@ -1,4 +1,5 @@
 // ① ここに、useState の import を書く
+import { useState } from "react";
 import diagnosis from "../data/diagnosis.json";
 import { judge } from "../lib/score";
 import ResultView from "./ResultView";
@@ -6,9 +7,11 @@ import DebugPanel from "./DebugPanel";
 
 function DiagnosisPlayer() {
   // ① 質問番号を useState で覚える
-  const currentQuestion = 0;
+  //今何問目か記録している
+  const [currentQuestion, setCurrentQuestion] = useState(0);
   // ④ 回答記録を useState で覚える
-  const answers = {};
+  //ユーザーがどの質問にどの選択肢を選んだかオブジェクト形式で記憶している
+  const [answers, setAnswers]= useState({});
 
   const question = diagnosis.questions[currentQuestion];
   const isFinished = question === undefined;
@@ -16,7 +19,8 @@ function DiagnosisPlayer() {
   // 次の質問へ進む（最後の質問では止まる）
   function handleNext() {
     if (currentQuestion < diagnosis.questions.length - 1) {
-      // ② ここで、質問番号を更新する
+      // ② ここで、質問番号を更新する　次の質問データが読み込まれるようになる
+      setCurrentQuestion(currentQuestion + 1);
     }
   }
 
@@ -66,18 +70,20 @@ function DiagnosisPlayer() {
             key={choice.id}
             className={choice.id === selectedId ? "choice selected" : "choice"}
             /* ⑤ onClick を書く */
+            onClick = { () => handleChoose(choice) }
           >
             {choice.text}
           </button>
         ))}
       </div>
 
+      { /* 選択肢のボタンがクリックされたとき、その選択肢データ（choice）を handleChoose 関数に渡して実行 */ }
       <button
         className="next"
-        /* ③ onClick を書く */
-        /* ⑥ 実習②で、この7行を差し替える */
+        onClick={handleAnswerNext}
+        disabled={!answers[question.id]}
       >
-        次へ
+        回答して進む
       </button>
 
       <DebugPanel currentQuestion={currentQuestion} answers={answers} />
